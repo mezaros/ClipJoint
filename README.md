@@ -2,117 +2,46 @@
 
 ## Introduction
 
-> Add your project introduction here.
->
-> Suggested content:
-> - What ClipJoint is for
-> - Who it is for
-> - Why it exists
+ClipJoint is a lightweight macOS menu bar app for saving frequently used text snippets ("clips") and copying them back to the clipboard in one click. One click copies anything to the ClipJoint menu, and one click copies anything back to the clipboard. Think of it like TextExpander (or the Mac's built-in Text Replacements), putting frequently used text clips at your fingertips, only purely visual and far less capable.
+
+That's it. That's the app.
+
+## Why It Exists
+
+I built ClipJoint for two reasons: to fill a personal need, and to experiment with the world of AI coding assistants. While I'm technical and have done plenty of light scripting (Python and the like), I'm not a true developer. I don't know Swift. I don't know the MacOS APIs. I don't really know best practices, on the Mac or even for coding in general. I don't even have a developer account (which is why MacOS will warn you this is malware, more on that below). I've used AI for scripting over the past three years, but never a real coding assistant. I decided to use OpenAI Codex to write an entire utility without looking at a single line of code. Pure vibes.
+
+A usable app was ready after two interactions with the 5.3-Codex model set to Extra High reasoning. That probably took 15-20 minutes. A few hours of fiddling, over the course of two days, worked out some kinks and refined the design into something approximating a reasonable Mac app. To me, given my complete lack of knowledge in this space, that seems fairly magical (and fairly frightening). The app icon comes from a regular ChatGPT session, while the menu bar icon was adapted (by Codex) from the SF Symbols clipboard glyph.
+
+Is the code spaghetti? Is it the worst written Mac app in history? I have no idea. I've barely looked at the code. If you actually know what you're doing, I'd love to hear your take on it.
+
+What little I know: the app is written in Swift 5 and uses a mixture of SwiftUI and AppKit, as (allegedly) certain things could only be done in AppKit. No idea if that's true. I've asked Codex to explain how it works. See `/CODEX.md`.
 
 ## Overview
 
-ClipJoint is a lightweight macOS menu bar app for saving frequently used text snippets and copying them back to the clipboard in one click.
+ClipJoint is intentionally (for now, anyway) not a clipboard history manager. It stores only the clips you explicitly keep.
 
-It is intentionally not a clipboard history manager. It stores only the clips you explicitly keep.
+- Menu bar-only workflow.
+- Text focused. Rich text or similar is boiled down to plain text; this app only deals with plain text.
+- Dedicated **Edit Clips** window lets you revise, rearrange, or delete clips.
+- Can be set to launch at login (check out the expansive Settings window).
+- Clip titles are truncated, and bound to 25 characters when edited/saved.
+- Maximum clip text length: 20,000 characters per clip.
+- Maximum number of clips: 200. If the menu covers too much of your screen, a "More" submenu will appear (which, if content demands, eventually becomes scrollable).
 
-## Key Features
+## Not Malware
 
-- Menu bar-only workflow with a custom clipboard icon.
-- One-click copy from the menu (`Copied` HUD confirmation).
-- Add clip from current clipboard text (`Clip Added` HUD confirmation).
-- Dedicated **Edit Clips** window with:
-  - Rename clip title
-  - Edit clip content (via disclosure)
-  - Reorder clips (up/down)
-  - Delete clips
-  - Add blank clip
-  - Add clip from clipboard
-- **Settings** window with launch-at-login support.
-- Native About panel with app icon.
-- Persistent storage of clips between launches.
-- Practical clip count limit with top-level menu overflow into a `More` submenu.
+ClipJoint isn't malware (I mean, I'm pretty sure?). But because I don't have a developer account, the binaries are self-signed. If you build the app yourself, self-sign or use your own developer account. To run the pre-made binary, you'll need to control-click the app, dismiss the warning, then head to System Settings -> Privacy & Security and overrride the warning, and then agree to open anyway when MacOS alerts you.
 
-## Defaults on Fresh Install
+## Room for Improvement
 
-A new user starts with three clips:
+Lots of things that could be done here, if somebody wanted to:
 
-1. `Bob's your uncle`
-2. `Joe Bagodonuts`
-3. `The quick brown fox jumps over the lazy dog, or something like that. Honestly, feels kind of mean to shame the dog like this.`
-
-## Product Behavior
-
-### Menu
-
-Menu order:
-
-1. About ClipJoint
-2. Settings...
-3. Clip entries (top-level budgeted by screen height)
-4. More (shown only when clips overflow top-level budget)
-5. Add Clip from Clipboard
-6. Edit Clips...
-7. Quit
-
-### Clip naming and menu labels
-
-- Clip titles are bounded to `25` characters when edited/saved.
-- Menu entries use a fixed width and tail truncation so long labels remain compact.
-- If a clip title is empty, the menu label falls back to the beginning of clip content.
-
-### Clipboard ingest
-
-When adding from clipboard, ClipJoint attempts to normalize text in this order:
-
-1. Plain text (`public.utf8-plain-text`)
-2. `NSAttributedString` content
-3. RTF
-4. HTML
-
-If no usable text exists, add actions are disabled or no clip is created.
-
-### Limits
-
-- Maximum clip text length: `20,000` characters per clip.
-- Maximum number of clips: `300`.
-- Top-level menu clipping: if estimated height exceeds `3/4` of visible screen height, extra clips move into `More`.
-
-## Architecture
-
-### Tech stack
-
-- Swift 5
-- SwiftUI app lifecycle and primary UI
-- Focused AppKit interop where SwiftUI alone is not sufficient
-
-### SwiftUI vs AppKit split
-
-SwiftUI handles:
-
-- App scenes/windows
-- Menu content structure
-- Editor and settings UI
-- Data binding/state flow
-
-AppKit handles:
-
-- Pasteboard access (`NSPasteboard`)
-- About panel (`NSApp.orderFrontStandardAboutPanel`)
-- Non-activating HUD panel (`NSPanel`) for copy/add feedback
-- Reliable menu-open timing hooks (`NSMenu.didBeginTrackingNotification`)
-- Window focusing/identity bridging
-
-### Core source files
-
-- `ClipJoint/ClipJointApp.swift`: App scenes, menu bar entry point, commands.
-- `ClipJoint/ClipMenuView.swift`: Menu content, overflow partitioning, window focus behavior, add/copy actions.
-- `ClipJoint/ClipStore.swift`: Clip model, persistence, limits, ordering, clipboard caching.
-- `ClipJoint/ClipsEditorView.swift`: Full clip editor UI.
-- `ClipJoint/SettingsView.swift`: Launch-at-login setting UI.
-- `ClipJoint/AppSettings.swift`: Login-item service integration.
-- `ClipJoint/ClipboardNormalizer.swift`: Clipboard text normalization pipeline.
-- `ClipJoint/ClipTextFormatter.swift`: Label/title/preview shaping and truncation helpers.
-- `ClipJoint/HUDController.swift`: HUD presentation and animation.
+- Optionally allow rich text, HTML, or even purely non-text clips.
+- Optional keyboard shortcut assignment for each clip.
+- Allow custom-set widths for the menus (instead of always truncating clip titles at 25 characters).
+- Add basic clipboard management features (i.e. automatic clipboard history).
+- Properly signed releases, like a real grown-up boy.
+- Automatic updates.
 
 ## Build and Run
 
@@ -127,61 +56,11 @@ AppKit handles:
 2. Select the `ClipJoint` scheme.
 3. Build and run.
 
-Current project settings place the built app in:
+You probably will want to customize the project settings. Current settings place the built app in:
 
 - `/Applications/ClipJoint.app`
-
-### Command line build
-
-From repository root:
-
-```bash
-xcodebuild -project ClipJoint.xcodeproj -scheme ClipJoint -destination 'platform=macOS' build
-```
-
-## Settings and Login Item
-
-- Setting label: `Launch automatically at login`.
-- Default for new users: off.
-- Uses `ServiceManagement` (`SMAppService.mainApp`) for registration.
-- If registration needs user approval, macOS prompts/flags in System Settings.
-
-## Data Storage
-
-Clip data is persisted in `UserDefaults` under:
-
-- `clipjoint.savedClips.v1`
-
-## Privacy and Permissions
-
-ClipJoint does **not** require Accessibility permissions.
-
-It reads clipboard data only for explicit clip actions and menu availability checks.
-
-## Keyboard Shortcuts
-
-- Settings: `Cmd + ,`
-- Quit: `Cmd + Q`
-
-## Testing Checklist (Manual)
-
-- Menu opens and clip list renders with truncation.
-- Clicking a clip copies text and shows `Copied` HUD.
-- `Add Clip from Clipboard` enables/disables based on clipboard text.
-- Adding from menu appends to bottom.
-- Editor add/reorder/delete updates menu immediately.
-- Editor disclosure state works (including new blank clip expansion).
-- Settings and Edit Clips actions focus existing windows when already open.
-- Launch-at-login toggle updates correctly.
-- App icon appears in Dock/About panel; menu bar icon remains template-readable in light/dark mode.
-
-## Troubleshooting
-
-- If launch-at-login fails, install/run from `/Applications` and retry.
-- If menu add action appears stale, reopen the menu once to force a fresh clipboard reconciliation.
-- If icon changes do not appear, fully quit ClipJoint and relaunch from `/Applications/ClipJoint.app`.
 
 ## License
 
 - Project is licensed under GPL 2.0.
-- Full license text: `LICENSE`
+- Full license text: `/LICENSE.txt`
