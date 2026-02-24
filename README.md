@@ -60,6 +60,10 @@ You probably will want to customize the project settings. Current settings place
 
 - `/Applications/ClipJoint.app`
 
+## See Also
+
+Before building ClipJoint, I scratched a similar AI itch with [HueSpot](https://github.com/mezaros/huespot).
+
 ## License
 
 - Project is licensed under GPL 2.0.
